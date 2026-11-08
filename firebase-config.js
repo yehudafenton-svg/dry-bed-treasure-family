@@ -1,9 +1,10 @@
-// ONE-TIME SETUP: Replace these placeholders with your Firebase web app settings.
-// Firebase Console > Project settings > Your apps > Web app > Config.
-// These are public app identifiers, not a password. Security is enforced by Firestore rules.
+
 window.DRY_BED_FIREBASE_CONFIG = {
-  apiKey: 'PASTE_API_KEY',
-  authDomain: 'PASTE_PROJECT_ID.firebaseapp.com',
-  projectId: 'PASTE_PROJECT_ID',
-  appId: 'PASTE_APP_ID'
+  apiKey: "AIzaSyD4pmRHgR3yLNUu5gNR2DamoXIf5rh2vKc",
+  authDomain: "dry-bed-treasure-family.firebaseapp.com",
+  projectId: "dry-bed-treasure-family",
+  storageBucket: "dry-bed-treasure-family.firebasestorage.app",
+  messagingSenderId: "527455905631",
+  appId: "1:527455905631:web:dbd378b0996e0933e738ea",
+  measurementId: "G-87H8P30XR5"
 };
