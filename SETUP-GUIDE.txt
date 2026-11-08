@@ -1,0 +1,107 @@
+DRY BED TREASURE - SHARED MONEY BOX (ANDROID + IPHONE)
+=====================================================
+
+WHAT CHANGED
+- The visual box is a MONEY BOX, including the label on the illustrated box.
+- The rewards remain $5 maximum for days 1-7, then $5 maximum each 14-day period.
+- A dry morning earns its fraction of that period's $5. Other mornings never subtract rewards.
+- With Firebase configured, both phones use the SAME record and update automatically.
+- Existing records from the old app are preserved on your phone during the upgrade.
+
+IMPORTANT: GitHub Pages hosts the website, but it does not store shared records.
+To turn on syncing, you must configure a free Firebase project. Until you do,
+this version still works locally, but the phones will not sync.
+
+PART A. UPDATE YOUR GITHUB PAGES APP
+------------------------------------
+1. Back up existing progress in the current app: Settings > Back up data.
+2. Unzip this updated package.
+3. On github.com/yehudafenton-svg/dry-bed-treasure, upload the CONTENTS of the
+   dry-bed-treasure folder, not the ZIP or the outer folder.
+4. Commit changes. Replace existing files of the same name, including index.html
+   and service-worker.js. Add cloud-sync.js and firebase-config.js.
+5. Refresh https://yehudafenton-svg.github.io/dry-bed-treasure/
+   You should now see "MY MONEY BOX" on the home screen.
+6. If installed as a home-screen app, close the app completely and reopen it.
+   The old service worker may require an additional reload before the new version appears.
+
+PART B. CREATE FIREBASE PROJECT (ONE TIME)
+------------------------------------------
+1. Open https://console.firebase.google.com/ and click Add project.
+2. Name it e.g. dry-bed-treasure-family. Disable Google Analytics (not needed).
+3. In project overview, click the WEB icon </> to register a WEB app.
+   Name it e.g. Dry Bed Treasure. You do not need Firebase Hosting.
+4. Find the code snippet named firebaseConfig. You need these values:
+   - apiKey
+   - authDomain
+   - projectId
+   - appId
+5. In the Firebase left menu, open Authentication. Click Get started.
+   Under Sign-in method, enable ANONYMOUS and Save.
+6. In the Firebase left menu, open Firestore Database. Click Create database.
+   Choose a location and PRODUCTION mode. Do not leave test rules active.
+7. Open the Firestore Rules tab. Replace the current rules with the EXACT
+   contents of firestore.rules.txt from this package. Tap PUBLISH.
+
+PART C. ADD YOUR FIREBASE SETTINGS TO GITHUB
+-------------------------------------------
+1. In your GitHub repository, open firebase-config.js and tap the edit pencil.
+2. Replace PASTE_API_KEY, PASTE_PROJECT_ID, and PASTE_APP_ID with the four
+   actual fields from your Firebase web app's firebaseConfig snippet.
+   Keep the quotation marks, commas, and JavaScript syntax unchanged.
+   Example:
+      window.DRY_BED_FIREBASE_CONFIG = {
+        apiKey: 'AIza...',
+        authDomain: 'your-project.firebaseapp.com',
+        projectId: 'your-project',
+        appId: '1:123456789:web:abcdef'
+      };
+3. Commit the edit. Wait for GitHub Pages to publish the new commit.
+4. Reload the website on your Android phone. Open Settings.
+   You should see "Create a shared money box" enabled.
+
+NOTE: Firebase web app config is NOT a password. The Firestore security rules
+and the long random sharing code protect the data. Do not publish the code itself.
+
+PART D. PAIR THE TWO PHONES
+--------------------------
+ON YOUR ANDROID (the phone with the existing progress):
+1. Open Dry Bed Treasure > Settings > Share across two phones.
+2. Tap "Create a shared money box" and confirm.
+3. Wait until the sync indicator says connected.
+4. Tap "Copy invite link for the other phone" and send it privately to your wife.
+
+ON THE IPHONE 14:
+1. Open the private link in SAFARI (not an in-app browser).
+2. The app should join automatically when the link opens.
+3. In Safari, tap Share > Add to Home Screen > Add.
+4. Open the new icon. If it asks to join again (iOS may keep the installed
+   app's storage separate from Safari), open Settings > Join an existing money
+   box and paste the same link or 32-character code.
+
+TEST:
+Record a test dry morning on one phone. Check that the day and money total
+appear on the other. You can then correct/remove the test day on the calendar.
+
+DATA & PRIVACY
+--------------
+- Only someone who has the private 32-character sharing code can locate and
+  edit this family's records; all Firebase requests also require an anonymous
+  authenticated account. The app does not require a parent email/password.
+- Treat the invite link like a password. Do not publish it or screenshot it.
+- The database holds an optional first name, plan settings, and the status
+  for each recorded date. This is sensitive family information.
+- Changes made in shared mode require internet. A device shows its last cached
+  copy if it cannot connect. Always check for the green "Family sync on" dot.
+- A local JSON backup is recommended before updating and occasionally after.
+- Clearing the app's local data is safe AFTER the box has synced, but you will
+  need the sharing code to rejoin after that.
+- Local mode continues to work even without Firebase.
+- If Firebase is not configured, the Create/Join buttons stay disabled.
+
+TECHNICAL DETAILS
+-----------------
+Cloud Firestore and Firebase Anonymous Authentication; one random 128-bit ID
+per family. Firestore rules deny browsing other boxes, validate records, and
+block all unrelated database paths. No paid Firebase plan normally needed for
+light use, subject to Firebase's current quotas and terms.

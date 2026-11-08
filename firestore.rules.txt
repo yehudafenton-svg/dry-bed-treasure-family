@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // A randomly generated 32-character (128-bit) code is required in the path.
+    // Users must also be anonymously authenticated. Never allow listing all boxes.
+    function okayBox(id) {
+      return request.auth != null && id.matches('^[a-f0-9]{32}$');
+    }
+    function okaySettings() {
+      return request.resource.data.keys().hasOnly(['name', 'start', 'goal', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['name', 'start', 'goal', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 34
+        && request.resource.data.start is string
+        && request.resource.data.start.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.goal is int
+        && request.resource.data.goal >= 500
+        && request.resource.data.goal <= 100000
+        && request.resource.data.updatedAt == request.time;
+    }
+    function okayDay(day) {
+      return day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['status', 'updatedAt'])
+        && request.resource.data.status in ['dry', 'notDry']
+        && request.resource.data.updatedAt == request.time;
+    }
+    match /boxes/{boxId}/meta/settings {
+      allow get: if okayBox(boxId);
+      allow list: if false;
+      allow create, update: if okayBox(boxId) && okaySettings();
+      allow delete: if false;
+    }
+    match /boxes/{boxId}/days/{day} {
+      allow get, list: if okayBox(boxId);
+      allow create, update: if okayBox(boxId) && okayDay(day);
+      allow delete: if okayBox(boxId) && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+    // All other collections and documents are denied.
+  }
+}

@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#fff8eb" />
+  <meta name="description" content="A cheerful dry-bed tracker with a growing money box, rewards, and optional family syncing." />
+  <title>Dry Bed Treasure</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <style>
+    :root { --ink:#193953; --muted:#607588; --blue:#1b6f96; --blue-deep:#125473; --aqua:#d7f2f5; --cream:#fff9ee; --gold:#e3a73f; --gold-deep:#bc732c; --line:#dfe9ec; --surface:#fff; --good:#248871; --good-bg:#e3f6eb; --shadow:0 12px 38px rgba(48,64,67,.085); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; background: radial-gradient(ellipse at top left,#fff1ce 0,transparent 35%), radial-gradient(ellipse at 100% 8%,#dff8f4 0,transparent 34%),#f8fbfa; color:var(--ink); font-family:ui-rounded,"Trebuchet MS",system-ui,-apple-system,"Segoe UI",sans-serif; min-height:100vh; }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible { outline:3px solid #ffba62; outline-offset:3px; }
+    button:disabled { cursor:not-allowed; opacity:.45; }
+    .app { max-width:1060px; margin:auto; padding:21px 22px 62px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:4px 0 25px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand-icon { display:grid;place-items:center; width:43px;height:43px;border-radius:14px;background:linear-gradient(145deg,#ffdf89,#f4ae4a);box-shadow:0 6px 12px #a96e3521;font-size:24px; }
+    .brand b {display:block;font-size:17px;letter-spacing:-.4px}
+    .brand small {display:block;color:var(--muted);font-size:12px;margin-top:1px}
+    .icon-btn { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:15px; width:43px; height:43px; display:grid;place-items:center; box-shadow:0 5px 18px #26475908; }
+    .icon-btn svg { width:21px; height:21px; stroke:currentColor; }
+    .intro {margin:0 0 22px;}
+    .eyebrow {font-size:12px; text-transform:uppercase; letter-spacing:2px; font-weight:800; color:#2b8295; margin:0 0 6px;}
+    h1 {font-size:clamp(29px,4.4vw,46px);line-height:1.12;letter-spacing:-1.7px;margin:0 0 9px;}
+    .lead {color:var(--muted); margin:0; font-size:15px;line-height:1.55;}
+    .hero {display:grid;grid-template-columns:minmax(0, 1fr) minmax(330px,.9fr);gap:22px;align-items:stretch;}
+    .panel {background:var(--surface);border:1px solid #e9eef1;border-radius:27px;box-shadow:var(--shadow);}
+    .stats-panel {padding:27px;display:flex;flex-direction:column;gap:22px;}
+    .heading-line {font-size:14px;font-weight:800;color:var(--blue);letter-spacing:.25px;}
+    .balance {font-size:clamp(49px,6vw,69px);font-weight:900;letter-spacing:-3px;line-height:1.04;margin-top:7px;font-variant-numeric:tabular-nums;color:#173a51;}
+    .helper {color:var(--muted);font-size:13px;margin:5px 0 0;}
+    .stats-grid {display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+    .mini-stat {background:#f5faf9;border:1px solid #e5eeee;border-radius:20px;padding:18px 16px;min-height:107px;}
+    .mini-stat span {font-size:12px;color:var(--muted);font-weight:750;}
+    .mini-stat strong {display:block;font-size:28px;line-height:1.35;letter-spacing:-.7px;font-variant-numeric:tabular-nums;}
+    .round-banner {background:linear-gradient(120deg,#e7f5f6,#f5fbf2);padding:17px;border-radius:20px;}
+    .round-banner strong {display:block;font-size:16px;margin-top:4px}
+    .round-banner small {display:block;font-size:12px;color:var(--muted);margin-top:4px;}
+    .track {height:11px;border-radius:99px;background:#cce2e4;overflow:hidden;margin-top:15px;}
+    .track > div {height:100%;width:0%;transition:width .5s ease;border-radius:inherit;background:linear-gradient(90deg,#38a892,#1c7794);}
+    .track-caption {font-size:12px;font-weight:800;color:var(--blue-deep);margin-top:7px;display:flex;justify-content:space-between;gap:6px}
+    .reward-note {display:flex;align-items:flex-start;gap:10px;color:var(--muted);font-size:12px;line-height:1.55;}
+    .reward-note svg {flex-shrink:0;width:18px;height:18px;stroke:var(--good);margin-top:1px}
+    .jar-panel {position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 22px 25px;background:radial-gradient(ellipse at 50% 43%,#fff8e5,#fffcf5 64%,#f7f3e8 100%);text-align:center;}
+    .sparkle {position:absolute;color:#f4c463; font-size:25px;opacity:.8;pointer-events:none;}
+    .sparkle.s1{top:14%;left:13%;}.sparkle.s2{top:30%;right:13%;font-size:16px}.sparkle.s3{bottom:23%;left:15%;font-size:16px}
+    .jar-caption {font-size:14px;color:#7b633e;font-weight:850;padding-top:9px;margin:0}
+    .jar-goal {font-size:12px;color:#927b58;margin:4px 0 0}
+    .jar-button {display:block;border:0;background:transparent;padding:0;position:relative;transform:translateZ(0);width:min(100%,328px);max-height:360px;transition:transform .15s;}
+    .jar-button:active {transform:scale(.965)}
+    .jar-button svg {width:100%;height:auto;display:block;filter:drop-shadow(0 14px 12px #aa814032)}
+    .jar-button .shine {animation:glow 4s ease-in-out infinite;transform-origin:center}
+    @keyframes glow {0%,100%{opacity:.55}50%{opacity:.9}}
+    #waterFill {transition:y .75s cubic-bezier(.2,.8,.2,1),height .75s cubic-bezier(.2,.8,.2,1)}
+    .jar-milestone {color:#6d794b;font-size:12px;font-weight:800;min-height:19px;}
+    .primary {width:100%;min-height:57px;border:none;border-radius:17px;background:linear-gradient(120deg,#18789a,#145d82);color:white;font-size:17px;font-weight:850;box-shadow:0 9px 16px #145d8230;transition:transform .12s,box-shadow .12s;}
+    .primary:hover{box-shadow:0 11px 20px #145d8245}
+    .primary:active{transform:scale(.98)}
+    .quiet {display:block;margin:12px auto 0;border:0;background:transparent;font-weight:750;color:var(--muted);font-size:13px;padding:7px 14px;}
+    .tiny-note {font-size:12px;line-height:1.55;color:#79715c;margin:9px 0 0;}
+    .lower {display:grid;grid-template-columns:1.2fr .8fr;gap:22px;margin-top:22px;align-items:start}
+    .calendar-panel {padding:24px;}
+    .panel-head {display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:7px}
+    h2 {font-size:21px;letter-spacing:-.5px;margin:0;}
+    .calendar-sub {color:var(--muted);font-size:12px;line-height:1.5;margin:0 0 20px}
+    .cal-nav {display:flex;align-items:center;gap:6px}
+    .cal-nav span {font-size:13px;font-weight:850;min-width:118px;text-align:center}
+    .cal-arrow {width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--ink);font-weight:900;font-size:19px}
+    .cal-week,.cal-grid {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;}
+    .cal-week {padding-bottom:8px}
+    .cal-week span {font-size:11px;font-weight:800;color:#81919a;text-align:center}
+    .date-cell {min-height:47px;border:1px solid transparent;border-radius:12px;background:#f5f8fa;color:var(--ink);position:relative;font-weight:750;font-size:14px;transition:transform .1s,background .1s}
+    .date-cell:not(:disabled):active {transform:scale(.94)}
+    .date-cell.blank {background:transparent;border-color:transparent;pointer-events:none}
+    .date-cell.future,.date-cell.before {color:#b5c2c9;background:#f7f8f8}
+    .date-cell.dry {background:var(--good-bg);color:#147861;border:1px solid #bce7d4}
+    .date-cell.notdry {background:#f5f1e9;color:#8a7c68;border:1px solid #e9dfcd}
+    .date-cell.today {box-shadow:inset 0 0 0 2px #3089a7}
+    .day-icon {display:block;font-size:10px;height:12px;margin-top:0;line-height:11px}
+    .cal-legend {display:flex;gap:13px;flex-wrap:wrap;margin-top:15px;color:var(--muted);font-size:11px;font-weight:700}
+    .legend-dot {display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:0}
+    .legend-dot.dry {background:#61cda6}.legend-dot.other{background:#c9b99f}.legend-dot.empty{background:#d5e0e4}
+    .about-panel {padding:24px;}
+    .steps {margin-top:18px;display:flex;flex-direction:column;gap:15px}
+    .step {display:flex;align-items:flex-start;gap:11px}
+    .step-number {width:28px;height:28px;border-radius:50%;flex-shrink:0;background:#fff0c6;color:#986323;display:grid;place-items:center;font-weight:850;font-size:13px}
+    .step b {font-size:14px;display:block;margin:1px 0 3px}
+    .step p {font-size:12px;line-height:1.5;color:var(--muted);margin:0}
+    .about-panel .small-line {margin-top:20px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px;line-height:1.5}
+    .footer {text-align:center;color:#82939c;font-size:11px;margin-top:24px;line-height:1.6}
+    .overlay {position:fixed;inset:0;background:#18384999;display:grid;place-items:center;padding:18px;z-index:20;backdrop-filter:blur(3px)}
+    .overlay[hidden] {display:none !important}
+    .dialog {width:min(100%,440px);max-height:min(90dvh,740px);overflow:auto;background:#fff;border-radius:25px;box-shadow:0 18px 80px #0d283f50;padding:26px;}
+    .dialog-top {display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .dialog h3 {margin:0;font-size:22px;letter-spacing:-.5px}
+    .x {width:35px;height:35px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:22px;line-height:1}
+    .dialog-desc {font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 19px}
+    .choice {width:100%;border:1px solid var(--line);padding:16px;border-radius:16px;background:#fff;display:flex;align-items:center;gap:14px;text-align:left;margin:10px 0;color:var(--ink)}
+    .choice .emoji {font-size:27px}
+    .choice b {display:block;font-size:15px}.choice small {display:block;color:var(--muted);font-size:12px;margin-top:3px}
+    .choice.win {background:#e7f8ed;border-color:#b6e8cf}.choice.win b {color:#146e57}
+    .choice.soft {background:#fbf7ee;border-color:#eee2ce}
+    .text-btn {width:100%;border:0;background:transparent;font-size:13px;color:var(--muted);font-weight:850;padding:12px}
+    .field {margin:16px 0;}
+    .field label {font-size:13px;font-weight:850;display:block;margin-bottom:7px;}
+    .field input {display:block;width:100%;border:1px solid #cadde3;background:#fcfefe;border-radius:12px;padding:13px 14px;font-size:16px;color:var(--ink);}
+    .setting-note {padding:12px 14px;border-radius:13px;background:#f5faf9;color:var(--muted);font-size:12px;line-height:1.55;margin:12px 0 18px}
+    .settings-actions {display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}
+    .sync-banner {display:flex;align-items:center;gap:8px;padding:8px 11px;margin:-17px 0 22px;border:1px solid #dbe9ea;border-radius:13px;background:#fff;color:#5c7580;font-size:12px;font-weight:800;max-width:100%;}
+    .status-dot {width:9px;height:9px;display:inline-block;flex:none;border-radius:50%;background:#b4c0c3;}
+    .status-dot.connected {background:#2aaa83;box-shadow:0 0 0 3px #ccefe3;}
+    .status-dot.waiting {background:#e5a33b;}
+    .sync-section {border-top:1px solid var(--line);padding-top:18px;margin-top:21px;}
+    .sync-section h4 {margin:0 0 9px;font-size:16px;}
+    .sync-section .setting-note {margin:9px 0 13px;}
+    .sync-label {display:block;font-size:12px;font-weight:800;margin:14px 0 7px;color:var(--muted)}
+    .sync-section input {width:100%;height:45px;border-radius:12px;border:1px solid #cddfe6;padding:10px 12px;}
+    .sync-full {width:100%;margin-top:9px;min-height:43px}
+    .sync-privacy {color:#7c8d95;font-size:11px;line-height:1.5;margin:12px 0 0}
+    .share-code-box {padding:12px;border:1px solid #e5ecee;border-radius:12px;background:#f8fbfc;}
+    .share-code-box span {display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+    .share-code-box code {font-size:11px;word-break:break-all;font-weight:800;color:var(--blue-deep)}
+    .sync-section [hidden] {display:none !important}
+    .secondary {background:#fff;border:1px solid #cddfe6;color:var(--blue-deep);border-radius:13px;padding:12px 10px;font-weight:800;font-size:13px}
+    .danger {color:#b45656;background:transparent;border:0;padding:13px;font-size:12px;font-weight:800;display:block;margin:10px auto 0;}
+    .toast {position:fixed;left:50%;bottom:max(23px,env(safe-area-inset-bottom));transform:translate(-50%,30px);background:#183f53;color:white;padding:13px 18px;border-radius:16px;box-shadow:0 10px 40px #0c324355;z-index:30;max-width:calc(100vw - 40px);font-size:13px;font-weight:750;opacity:0;pointer-events:none;transition:opacity .24s,transform .24s;text-align:center;}
+    .toast.show {opacity:1;transform:translate(-50%,0)}
+    .coin-fly {position:absolute;left:50%;top:8%;font-size:38px;z-index:3;pointer-events:none;animation:coinFall .9s ease-in forwards;filter:drop-shadow(0 4px 4px #734e3a44)}
+    @keyframes coinFall {0%{opacity:0;transform:translate(-50%,-20px) rotate(-20deg) scale(.8)}20%{opacity:1}76%{opacity:1}100%{opacity:0;transform:translate(-50%,140px) rotate(370deg) scale(.45)}}
+    .confetti {position:absolute;left:50%;top:43%;width:7px;height:11px;border-radius:2px;pointer-events:none;animation:burst 850ms ease-out forwards;z-index:4}
+    @keyframes burst {from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rotate))}}
+    @media(max-width:760px){.app {padding:14px 15px 50px}.topbar{padding-bottom:22px}.hero,.lower{grid-template-columns:1fr;gap:15px}.intro{text-align:center;margin-bottom:18px}.hero .jar-panel{order:-1}.jar-panel{padding:5px 14px 20px}.jar-button{max-width:290px}.stats-panel{padding:21px;gap:19px}.balance{font-size:55px}.lower{margin-top:15px}.calendar-panel,.about-panel{padding:20px}.date-cell{min-height:44px}.cal-week,.cal-grid{gap:5px}}
+    @media(max-width:350px){.cal-nav span{min-width:98px;font-size:12px}.date-cell{min-height:39px}.stats-grid{gap:9px}.mini-stat{padding:12px 10px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-icon" aria-hidden="true">🪙</div><div><b>Dry Bed Treasure</b><small>Every dry morning is a win</small></div></div>
+    <button id="settingsBtn" class="icon-btn" type="button" aria-label="Settings" title="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.05.05-2 2-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21h-2.8v-.12a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2-2 .05-.05A1.7 1.7 0 0 0 7.5 15a1.7 1.7 0 0 0-1.56-1H5.8v-2.8h.14a1.7 1.7 0 0 0 1.56-1 1.7 1.7 0 0 0-.34-1.88l-.05-.06 2-2 .06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.56V5h2.8v.1a1.7 1.7 0 0 0 1 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2 2-.05.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1h.14V14h-.14a1.7 1.7 0 0 0-1.56 1Z" transform="translate(-1 -1)"/></svg>
+    </button>
+  </header>
+  <button id="syncBanner" class="sync-banner" type="button" title="Sharing and sync settings"><span id="syncDot" class="status-dot"></span><span id="syncBannerText">Saved on this device only</span><span aria-hidden="true">⚙</span></button>
+  <div class="intro"><p class="eyebrow">A little celebration, every day</p><h1 id="pageTitle">Watch your treasure grow!</h1><p class="lead">Tap the money box after a dry morning, and see another coin drop in.</p></div>
+  <main>
+    <div class="hero">
+      <section class="panel stats-panel" aria-label="Rewards dashboard">
+        <div><div class="heading-line">TOTAL EARNED</div><div class="balance" id="totalEarned">$0.00</div><p class="helper" id="balanceCaption">Your treasure is just getting started!</p></div>
+        <div class="stats-grid">
+          <div class="mini-stat"><span>Dry mornings</span><strong id="dryCount">0</strong></div>
+          <div class="mini-stat"><span>Days tracked</span><strong id="trackedCount">0</strong></div>
+        </div>
+        <div class="round-banner"><div class="heading-line" id="roundTitle">First-week reward</div><strong id="roundReward">$0.00 of $5.00 earned</strong><small id="roundCaption">7 days to work toward your first $5</small><div class="track"><div id="roundBar"></div></div><div class="track-caption"><span id="roundDry">0 of 7 dry mornings</span><span id="roundDays">Day 1 of 7</span></div></div>
+        <div class="reward-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 10v6m0-9h.01"/></svg><div>The first 7 days can earn up to <b>$5</b>. Every 14-day period after that can earn up to <b>$5</b>. Only dry mornings add money; you never lose what you've already earned.</div></div>
+      </section>
+      <section class="panel jar-panel" aria-label="Interactive money box">
+        <span class="sparkle s1" aria-hidden="true">✦</span><span class="sparkle s2" aria-hidden="true">✧</span><span class="sparkle s3" aria-hidden="true">✦</span>
+        <p class="jar-caption">MY MONEY BOX</p><p class="jar-goal" id="jarGoalText">Filling toward $25.00</p>
+        <button class="jar-button" type="button" id="jarButton" aria-label="Tap money box to record today's dry morning" title="Tap to record a dry morning">
+          <svg viewBox="0 0 320 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="svgTitle">
+            <title id="svgTitle">A wooden money box with a transparent window showing growing gold coins</title>
+            <defs>
+              <linearGradient id="wood" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#eac18a"/><stop offset=".38" stop-color="#cf8f52"/><stop offset=".8" stop-color="#b9753d"/><stop offset="1" stop-color="#a66336"/></linearGradient>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e4f6fa" stop-opacity=".92"/><stop offset="1" stop-color="#c8e1e6" stop-opacity=".62"/></linearGradient>
+              <linearGradient id="goldWater" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f9d474"/><stop offset="1" stop-color="#d99534"/></linearGradient>
+              <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1ad"/><stop offset=".42" stop-color="#f7be40"/><stop offset="1" stop-color="#cb8427"/></linearGradient>
+              <clipPath id="windowClip"><rect x="84" y="126" width="152" height="173" rx="8"/></clipPath>
+            </defs>
+            <ellipse cx="160" cy="323" rx="114" ry="13" fill="#a88559" opacity=".20"/>
+            <rect x="61" y="82" width="198" height="232" rx="22" fill="url(#wood)" stroke="#9f6336" stroke-width="3"/>
+            <path d="M75 96v204M248 96v203" stroke="#ffe2ab" opacity=".4" stroke-width="4" stroke-linecap="round" />
+            <rect x="75" y="114" width="170" height="193" rx="17" fill="#986033" stroke="#f7d2a3" stroke-width="4"/>
+            <rect x="83" y="125" width="154" height="175" rx="9" fill="url(#glass)" stroke="#7b5c40" stroke-width="3"/>
+            <g clip-path="url(#windowClip)">
+              <rect id="waterFill" x="84" y="299" width="152" height="0" fill="url(#goldWater)" opacity=".85"/>
+              <g id="coinStack"></g>
+              <path class="shine" d="M99 133 L125 133 105 292 90 292Z" fill="#fff" opacity=".2" />
+              <path d="M188 125 L205 125 185 297 173 297Z" fill="#fff" opacity=".12" />
+            </g>
+            <rect x="83" y="125" width="154" height="175" rx="9" fill="none" stroke="#f9daa9" stroke-width="3" opacity=".7"/>
+            <circle cx="84" cy="103" r="4" fill="#ffdfa3"/><circle cx="236" cy="103" r="4" fill="#ffdfa3"/><circle cx="83" cy="296" r="4" fill="#ffdfa3"/><circle cx="238" cy="296" r="4" fill="#ffdfa3"/>
+            <rect x="55" y="55" width="210" height="42" rx="12" fill="#bb7c43" stroke="#955a2f" stroke-width="3"/>
+            <rect x="64" y="48" width="192" height="41" rx="10" fill="url(#wood)" stroke="#996134" stroke-width="3" />
+            <rect x="119" y="60" width="82" height="9" rx="4.5" fill="#65482e"/><rect x="124" y="62" width="72" height="3" rx="1.5" fill="#392e23"/>
+            <rect x="135" y="13" width="50" height="39" rx="9" fill="url(#coin)" stroke="#bf8732" stroke-width="3" transform="rotate(-8 160 40)"/>
+            <path d="M150 25l21 0" stroke="#fff4ac" opacity=".85" stroke-width="4" stroke-linecap="round"/>
+            <text x="160" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="bold" fill="#6c4326">COINS</text>
+          </svg>
+        </button>
+        <div class="jar-milestone" id="jarMilestone">0% full</div>
+        <button id="mainAction" class="primary" type="button">🪙 I had a dry bed!</button>
+        <button id="otherAction" class="quiet" type="button">Not dry this morning</button>
+        <p class="tiny-note" id="todayReward">Today's dry morning adds $0.71</p>
+      </section>
+    </div>
+    <div class="lower">
+      <section class="panel calendar-panel" aria-labelledby="calendarTitle">
+        <div class="panel-head"><h2 id="calendarTitle">Your calendar</h2><div class="cal-nav"><button id="monthPrev" class="cal-arrow" type="button" aria-label="Previous month">‹</button><span id="monthLabel">November 2026</span><button id="monthNext" class="cal-arrow" type="button" aria-label="Next month">›</button></div></div>
+        <p class="calendar-sub">Tap any past date to add or change an entry.</p>
+        <div class="cal-week" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div class="cal-grid" id="calendarGrid"></div>
+        <div class="cal-legend"><span><i class="legend-dot dry"></i>Dry</span><span><i class="legend-dot other"></i>Not dry</span><span><i class="legend-dot empty"></i>Not logged</span></div>
+      </section>
+      <section class="panel about-panel" aria-labelledby="worksTitle"><h2 id="worksTitle">How it works</h2>
+        <div class="steps">
+          <div class="step"><div class="step-number">1</div><div><b>Celebrate each dry morning</b><p>Tap the box or the big blue button. A coin drops in!</p></div></div>
+          <div class="step"><div class="step-number">2</div><div><b>Earn a little toward your reward</b><p>The first week is worth up to $5. After that, each two-week period is worth up to $5.</p></div></div>
+          <div class="step"><div class="step-number">3</div><div><b>Keep all your progress</b><p>Other mornings don't subtract money or reset your progress. You can correct any day's entry on the calendar.</p></div></div>
+        </div>
+        <div class="small-line">🔒 Your records stay on this device until you connect a shared money box. In shared mode, the same records update on both phones through Firebase. Keep your private sharing code safe, and make backups in Settings.</div>
+      </section>
+    </div>
+  </main>
+  <footer class="footer">Made for small victories and big smiles. ⭐</footer>
+</div>
+<div class="overlay" id="dateOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dateDialogTitle"><div class="dialog-top"><h3 id="dateDialogTitle">Record a morning</h3><button class="x" type="button" data-close="dateOverlay" aria-label="Close">×</button></div><p class="dialog-desc" id="dateDesc"></p>
+    <button id="saveDry" class="choice win" type="button"><span class="emoji">🌟</span><span><b>Dry bed!</b><small id="dryValue">Add $0.71</small></span></button>
+    <button id="saveNotDry" class="choice soft" type="button"><span class="emoji">☁️</span><span><b>Not dry</b><small>That's okay — tomorrow is another day.</small></span></button>
+    <button id="clearEntry" class="text-btn" type="button">Clear this day's entry</button>
+  </div>
+</div>
+<div class="overlay" id="settingsOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="dialog-top"><h3 id="settingsTitle">⚙️ Settings</h3><button class="x" type="button" data-close="settingsOverlay" aria-label="Close">×</button></div><p class="dialog-desc">Make this money box your own.</p>
+    <form id="settingsForm">
+      <div class="field"><label for="childName">Child's name (optional)</label><input id="childName" maxlength="34" placeholder="e.g., Moishy" autocomplete="off" /></div>
+      <div class="field"><label for="startDate">First day of your reward plan</label><input id="startDate" type="date" required /></div>
+      <div class="field"><label for="boxGoal">Money-box fill-up goal ($)</label><input id="boxGoal" type="number" min="5" step="5" max="1000" required /></div>
+      <p class="setting-note">The box fills toward the goal you choose (default $25). Reward amounts remain $5 for the first 7 calendar days, then up to $5 in each 14-day period. Each dry day earns its share of that period's $5.</p>
+      <button class="primary" type="submit">Save settings</button>
+    </form>
+    <section class="sync-section" aria-labelledby="syncTitle">
+      <h4 id="syncTitle">📱 Share across two phones</h4>
+      <p id="syncHelp" class="setting-note">Checking sync availability…</p>
+      <div id="syncSetupControls">
+        <button id="createSharedBtn" class="secondary sync-full" type="button">✨ Create a shared money box</button>
+        <label for="joinCode" class="sync-label">Have a code or sharing link?</label>
+        <input id="joinCode" type="text" placeholder="Paste the sharing code or link" autocomplete="off" autocapitalize="none" spellcheck="false" />
+        <button id="joinSharedBtn" class="secondary sync-full" type="button">Join an existing money box</button>
+      </div>
+      <div id="syncConnectedControls" hidden>
+        <div class="share-code-box"><span>Private sharing code</span><code id="shownShareCode"></code></div>
+        <button id="copyLinkBtn" class="secondary sync-full" type="button">🔗 Copy invite link for the other phone</button>
+        <button id="leaveSharedBtn" class="quiet" type="button">Stop syncing on this phone</button>
+      </div>
+      <p class="sync-privacy">Only people with your private code can open or edit this shared box. Don't share it publicly. Internet is needed to save shared changes.</p>
+    </section>
+    <div class="settings-actions"><button class="secondary" type="button" id="exportBtn">↓ Back up data</button><button class="secondary" type="button" id="importBtn">↑ Restore backup</button></div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden />
+    <button class="danger" id="resetBtn" type="button">Clear all records</button>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="./firebase-config.js"></script>
+<script>
+(() => {
+'use strict';
+const KEY='dry-bed-treasure-v1';
+const $=(id)=>document.getElementById(id);
+function localToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function toUtcDay(s){const [y,m,d]=s.split('-').map(Number);return Math.floor(Date.UTC(y,m-1,d)/86400000)}
+function daysBetween(a,b){return toUtcDay(b)-toUtcDay(a)}
+function asDate(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d,12)}
+function dateKey(y,m,d){return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function dollars(c){return '$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function isIsoDay(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(asDate(s).getTime())&&s===dateKey(asDate(s).getFullYear(),asDate(s).getMonth()+1,asDate(s).getDate())}
+function defaultState(){return {v:1,name:'',start:localToday(),goal:2500,days:{}}}
+function load(){try{const parsed=JSON.parse(localStorage.getItem(KEY));if(parsed&&parsed.v===1&&isIsoDay(parsed.start)&&parsed.days&&typeof parsed.days==='object'&&Number.isFinite(parsed.goal)){return {v:1,name:String(parsed.name||'').slice(0,34),start:parsed.start,goal:Math.max(500,Math.min(100000,Math.round(parsed.goal))),days:Object.fromEntries(Object.entries(parsed.days).filter(([d,v])=>isIsoDay(d)&&(v==='dry'||v==='notDry')))}}}catch(e){}return defaultState()}
+let state=load();let now=localToday();let calYear=asDate(now).getFullYear(),calMonth=asDate(now).getMonth();let modalDay=now;let toastTimer=null;
+const FAMILY_KEY='dry-bed-treasure-family-v2';
+const firebaseConfig=window.DRY_BED_FIREBASE_CONFIG;
+const firebaseConfigured=!!(firebaseConfig&&firebaseConfig.apiKey&&!String(firebaseConfig.apiKey).startsWith('PASTE_')&&firebaseConfig.projectId&&!String(firebaseConfig.projectId).startsWith('PASTE_')&&firebaseConfig.appId&&!String(firebaseConfig.appId).startsWith('PASTE_'));
+let cloudApi=null, cloudPromise=null, cloudPair=null, currentFamily='', cloudOnline=false, cloudBusy=false, pendingSettings=false;
+const pendingDays=new Map();
+function renderSync(){
+  const live=!!cloudPair;
+  $('syncDot').className='status-dot'+(live&&cloudOnline?' connected':live?' waiting':'');
+  $('syncBannerText').textContent=live?(cloudOnline?'Family sync on · Cloud connected':'Shared box · Checking connection'):(firebaseConfigured?'On this device · Tap to share':'Saved on this device only');
+  $('syncSetupControls').hidden=live;
+  $('syncConnectedControls').hidden=!live;
+  if(live){$('shownShareCode').textContent=currentFamily;}
+  $('syncHelp').textContent=live?(cloudOnline?'Connected! Each recorded morning and settings change updates on both phones.':'Shared box selected. Connect to the internet to record changes and synchronize.'):
+   firebaseConfigured?'Create a shared box on the phone that has your records. On the other phone, join with its private code or invite link.':
+   'Cloud sync is not configured yet. The app still works locally. Set up Firebase using the included SETUP-GUIDE.txt and firebase-config.js files.';
+  $('createSharedBtn').disabled=!firebaseConfigured||cloudBusy;
+  $('joinSharedBtn').disabled=!firebaseConfigured||cloudBusy;
+  $('copyLinkBtn').disabled=!live;
+}
+function shareURL(){return location.origin+location.pathname+'#box='+currentFamily}
+async function firebase(){
+  if(!firebaseConfigured)throw new Error('Firebase needs to be configured first.');
+  if(!cloudPromise)cloudPromise=import('./cloud-sync.js').then(m=>m.makeCloud(firebaseConfig)).catch(err=>{cloudPromise=null;throw err});
+  cloudApi=await cloudPromise;
+  return cloudApi;
+}
+async function connectFamily(code, automatic=false){
+  const id=(code||'').toLowerCase();
+  if(!/^[a-f0-9]{32}$/.test(id)){showToast('Enter a valid 32-character sharing code.');return false}
+  if(cloudPair&&currentFamily===id)return true;
+  if(!automatic && !cloudPair && Object.keys(state.days).length>0 && !confirm('Joining an existing box replaces local records with the shared records. Back up this phone first if you want to preserve those records. Continue?'))return false;
+  cloudBusy=true;renderSync();
+  const previous=currentFamily;
+  try{
+    const api=await firebase();
+    currentFamily=id;
+    const pair=await api.subscribe(id,({settings,days,online})=>{
+      if(currentFamily!==id)return;
+      cloudOnline=online && navigator.onLine;
+      if(!pendingSettings){
+        if(isIsoDay(settings.start)&&Number.isInteger(settings.goal)&&settings.goal>=500&&settings.goal<=100000){state.name=settings.name;state.start=settings.start;state.goal=settings.goal;}
+      }
+      const merged={...days};
+      for(const [day,value] of pendingDays){if(value===null)delete merged[day];else merged[day]=value;}
+      state.days=merged;
+      persist();renderDashboard();renderSync();
+    },err=>{console.error('Cloud listener:',err);cloudOnline=false;renderSync();showToast('Sync error. Check Firebase rules and your connection.');});
+    if(cloudPair)cloudPair.stop();
+    cloudPair=pair;
+    try{localStorage.setItem(FAMILY_KEY,id)}catch(_){showToast('Sharing code not saved on this device. Keep the invite link safe.')}
+    $('joinCode').value='';
+    renderSync();
+    if(!automatic)showToast('Shared money box connected!');
+    return true;
+  }catch(err){currentFamily=previous;console.error(err);showToast('Could not connect: '+(err?.message||'check setup'));return false;}
+  finally{cloudBusy=false;renderSync();}
+}
+async function createFamily(){
+  if(cloudBusy)return;
+  if(!confirm('Create one shared money box using the records already on this phone? You can then invite the other parent.'))return;
+  cloudBusy=true;renderSync();
+  try{
+    const api=await firebase();
+    const code=await api.create(state);
+    cloudBusy=false;
+    const connected=await connectFamily(code,true);
+    $('settingsOverlay').hidden=false;
+    if(connected)showToast('Shared money box created! Copy the invite link below.');
+  }catch(err){console.error(err);showToast('Could not create shared box: '+(err?.message||'check setup'));}
+  finally{cloudBusy=false;renderSync();}
+}
+function syncIsReady(){
+  if(cloudBusy){showToast('Finish the current sync action first.');return false}
+  if(cloudPair&&!cloudOnline){showToast('Please connect to the internet before saving shared changes.');return false}
+  return true;
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){showToast('Could not save on this browser. Try exporting a backup.');return false}}
+function planFor(s){const elapsed=daysBetween(state.start,s);if(elapsed<0)return null;if(elapsed<7)return {number:1,day:elapsed,length:7,start:state.start,title:'First-week reward'};let period=Math.floor((elapsed-7)/14),day=(elapsed-7)%14;let startUtc=toUtcDay(state.start)+7+period*14;let x=new Date(startUtc*86400000);return {number:period+2,day,length:14,start:x.toISOString().slice(0,10),title:`Two-week reward #${period+1}`}}
+function centsFor(s){let p=planFor(s);if(!p)return 0;return Math.round((p.day+1)*500/p.length)-Math.round(p.day*500/p.length)}
+function periodForDate(s){const p=planFor(s);if(!p)return {total:0,dry:0};let cents=0,dry=0;for(const [day,entry] of Object.entries(state.days)){const dp=planFor(day);if(entry==='dry'&&dp&&dp.number===p.number){cents+=centsFor(day);dry++}}return {total:cents,dry}}
+function sums(){let earned=0,dry=0,tracked=0;for(const [day,entry] of Object.entries(state.days)){if(day<state.start||day>now)continue;tracked++;if(entry==='dry'){earned+=centsFor(day);dry++}}return {earned,dry,tracked}}
+function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
+function animateCoin(){const jar=$('jarButton');const e=document.createElement('span');e.textContent='🪙';e.className='coin-fly';jar.appendChild(e);setTimeout(()=>e.remove(),930);for(let i=0;i<13;i++){const s=document.createElement('span');s.className='confetti';s.style.background=['#e9ac44','#4dbda8','#ed7e6e','#93d4e1'][i%4];let a=i*(Math.PI*2/13),r=60+(i%4)*12;s.style.setProperty('--dx',`${Math.cos(a)*r}px`);s.style.setProperty('--dy',`${Math.sin(a)*r}px`);s.style.setProperty('--rotate',`${220+i*43}deg`);jar.appendChild(s);setTimeout(()=>s.remove(),900)}}
+function drawCoins(fillPct,dryCount){const stack=$('coinStack');stack.replaceChildren();const count=Math.min(28,Math.max(dryCount,Math.floor(fillPct/3.45)));const svgNS='http://www.w3.org/2000/svg';for(let i=0;i<count;i++){const row=Math.floor(i/6),col=i%6;const x=98+col*24+(row%2)*3;const y=285-row*23-(col%2)*2;const circle=document.createElementNS(svgNS,'ellipse');circle.setAttribute('cx',x);circle.setAttribute('cy',y);circle.setAttribute('rx','10');circle.setAttribute('ry','8');circle.setAttribute('fill','url(#coin)');circle.setAttribute('stroke','#b57924');circle.setAttribute('stroke-width','1.5');stack.appendChild(circle);const shine=document.createElementNS(svgNS,'path');shine.setAttribute('d',`M ${x-4} ${y-3} q 4 -4 8 0`);shine.setAttribute('fill','none');shine.setAttribute('stroke','#fff3b6');shine.setAttribute('stroke-width','1.5');stack.appendChild(shine)}}
+function renderJar(earned,dryCount){const pct=Math.max(0,Math.min(100,earned/state.goal*100));$('waterFill').setAttribute('y',String(299-173*pct/100));$('waterFill').setAttribute('height',String(173*pct/100));drawCoins(pct,dryCount);$('jarGoalText').textContent=`Filling toward ${dollars(state.goal)}`;$('jarMilestone').textContent=pct>=100?'🎉 Box full! You reached your goal!':`${Math.floor(pct)}% full • ${dollars(Math.max(0,state.goal-earned))} to go`}
+function renderDashboard(){now=localToday();const s=sums();$('totalEarned').textContent=dollars(s.earned);$('dryCount').textContent=s.dry;$('trackedCount').textContent=s.tracked;$('balanceCaption').textContent=s.dry===0?'Your treasure is just getting started!':`${s.dry} special ${s.dry===1?'morning':'mornings'} celebrated!`;
+  $('pageTitle').textContent=state.name?`${state.name}'s treasure is growing!`:'Watch your treasure grow!';
+  const p=planFor(now),todayStatus=state.days[now],future=now<state.start;
+  if(p){const o=periodForDate(now);$('roundTitle').textContent=p.title;$('roundReward').textContent=`${dollars(o.total)} of $5.00 earned`;$('roundCaption').textContent=p.number===1?'The first 7 days of your plan':`Reward round ${p.number} • 14 calendar days`;$('roundBar').style.width=(o.total/5)+'%';$('roundDry').textContent=`${o.dry} of ${p.length} dry mornings`;$('roundDays').textContent=`Day ${p.day+1} of ${p.length}`}
+  else {$('roundTitle').textContent='Your plan starts soon';$('roundReward').textContent='$0.00 of $5.00 earned';$('roundCaption').textContent=`Begins ${asDate(state.start).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;$('roundBar').style.width='0%';$('roundDry').textContent='0 of 7 dry mornings';$('roundDays').textContent='Not started'}
+  $('mainAction').textContent=future?'Your plan starts soon':todayStatus==='dry'?'✓ Dry morning recorded':todayStatus==='notDry'?"Edit today's entry":'🪙 I had a dry bed!';
+  $('otherAction').textContent=todayStatus?'Change today’s entry':'Not dry this morning';$('mainAction').disabled=future;$('otherAction').disabled=future;
+  $('todayReward').textContent=future?'Change the start date in Settings to begin earlier.':todayStatus==='dry'?`You earned ${dollars(centsFor(now))} today!`:todayStatus==='notDry'?'You can try again tomorrow. Every win counts.':`Today's dry morning adds ${dollars(centsFor(now))}`;
+  renderJar(s.earned,s.dry);renderCalendar();renderSync();}
+function renderCalendar(){const grid=$('calendarGrid');grid.replaceChildren();const first=new Date(calYear,calMonth,1,12),numberOfDays=new Date(calYear,calMonth+1,0).getDate();$('monthLabel').textContent=first.toLocaleString('en-US',{month:'short',year:'numeric'});const monthNow=asDate(now);$('monthNext').disabled=calYear===monthNow.getFullYear()&&calMonth===monthNow.getMonth();for(let i=0;i<first.getDay();i++){const x=document.createElement('div');x.className='date-cell blank';grid.appendChild(x)}for(let day=1;day<=numberOfDays;day++){const key=dateKey(calYear,calMonth+1,day),entry=state.days[key],b=document.createElement('button');b.type='button';b.className=`date-cell ${entry==='dry'?'dry':entry==='notDry'?'notdry':''} ${key===now?'today':''}`;const outOfRange=key>now||key<state.start;if(outOfRange)b.classList.add(key>now?'future':'before');b.disabled=outOfRange;b.setAttribute('aria-label',`${asDate(key).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}, ${entry==='dry'?'dry':entry==='notDry'?'not dry':'not logged'}`);const digit=document.createElement('span');digit.textContent=day;const icon=document.createElement('span');icon.className='day-icon';icon.textContent=entry==='dry'?'★':entry==='notDry'?'•':' ';b.append(digit,icon);if(!outOfRange)b.addEventListener('click',()=>openDate(key));grid.appendChild(b)}}
+function close(id){$(id).hidden=true}
+function openDate(day){if(day<state.start||day>now)return;modalDay=day;$('dateDialogTitle').textContent=asDate(day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});$('dateDesc').textContent=state.days[day]==='dry'?'This was a dry morning. You can update it if needed.':state.days[day]==='notDry'?'This morning was logged as not dry. You can update it.':'How did this morning go?';$('dryValue').textContent=`Earn ${dollars(centsFor(day))} for this morning`;$('clearEntry').hidden=!state.days[day];$('dateOverlay').hidden=false}
+async function applyEntry(day,value){
+  if(!syncIsReady())return;
+  const before=state.days[day];
+  if(value===null)delete state.days[day];else state.days[day]=value;
+  if(cloudPair)pendingDays.set(day,value);
+  persist();close('dateOverlay');renderDashboard();
+  if(value==='dry'){animateCoin();showToast(`🌟 Hooray! +${dollars(centsFor(day))} added!`)}
+  else if(value==='notDry')showToast('Saved. A fresh chance tomorrow!');else showToast('Entry cleared.');
+  if(cloudPair){
+    cloudBusy=true;
+    try {await cloudApi.setDay(currentFamily,day,value);}
+    catch(err){
+      console.error(err);
+      if(before===undefined)delete state.days[day];else state.days[day]=before;
+      showToast('Could not sync this morning. Please retry.');
+    }
+    finally{pendingDays.delete(day);cloudBusy=false;persist();renderDashboard();}
+  }
+}
+$('jarButton').addEventListener('click',()=>{if(now<state.start)return showToast('Your plan has not started yet.');if(state.days[now])openDate(now);else applyEntry(now,'dry')});
+$('mainAction').addEventListener('click',()=>{if(state.days[now])openDate(now);else applyEntry(now,'dry')});
+$('otherAction').addEventListener('click',()=>openDate(now));
+$('saveDry').addEventListener('click',()=>applyEntry(modalDay,'dry'));
+$('saveNotDry').addEventListener('click',()=>applyEntry(modalDay,'notDry'));
+$('clearEntry').addEventListener('click',()=>applyEntry(modalDay,null));
+$('monthPrev').addEventListener('click',()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendar()});
+$('monthNext').addEventListener('click',()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendar()});
+$('settingsBtn').addEventListener('click',()=>{$('childName').value=state.name;$('startDate').value=state.start;$('startDate').max=now;$('boxGoal').value=state.goal/100;$('settingsOverlay').hidden=false});
+$('settingsForm').addEventListener('submit',async(e)=>{
+ e.preventDefault();if(!syncIsReady())return;
+ const name=$('childName').value.trim(),start=$('startDate').value,goal=Math.round(Number($('boxGoal').value)*100);
+ if(!isIsoDay(start)||start>localToday()||!Number.isFinite(goal)||goal<500||goal>100000){showToast('Please check the start date and box goal.');return}
+ if(start!==state.start&&Object.keys(state.days).some(d=>d<start)&&!confirm('Some previously recorded days will fall before the new start date and will no longer count. Continue?'))return;
+ const previous={name:state.name,start:state.start,goal:state.goal};
+ state.name=name.slice(0,34);state.start=start;state.goal=goal;pendingSettings=true;persist();close('settingsOverlay');renderDashboard();
+ if(cloudPair){cloudBusy=true;try{await cloudApi.setSettings(currentFamily,state);showToast('Settings synced!')}
+ catch(err){console.error(err);Object.assign(state,previous);showToast('Could not sync settings. Please retry.')}
+ finally{pendingSettings=false;cloudBusy=false;persist();renderDashboard()}}
+ else{pendingSettings=false;showToast('Settings saved!')}
+});
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'dry-bed-treasure',savedAt:new Date().toISOString(),data:state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`dry-bed-treasure-backup-${now}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Backup downloaded.')});
+$('importBtn').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async(e)=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const parsed=JSON.parse(await file.text()),value=parsed?.data||parsed;
+  if(value?.v!==1||!isIsoDay(value.start)||!Number.isFinite(value.goal)||value.goal<500||value.goal>100000||!value.days||typeof value.days!=='object'||Array.isArray(value.days))throw Error('Invalid backup');
+  const newDays={};for(const [day,v] of Object.entries(value.days)){if(!isIsoDay(day)||(v!=='dry'&&v!=='notDry'))throw Error('Invalid day');newDays[day]=v}
+  if(!syncIsReady())return;
+  if(!confirm(cloudPair?'Restore this backup for BOTH parents? It replaces the entire shared box, including entries on the other phone.':'Restore this backup? This will replace the records currently on this device.'))return;
+  const next={v:1,name:String(value.name||'').slice(0,34),start:value.start,goal:Math.round(value.goal),days:newDays};
+  if(cloudPair){cloudBusy=true;await cloudApi.replaceAll(currentFamily,next);cloudBusy=false;showToast('Shared backup restored on both phones!')}
+  else{state=next;persist();renderDashboard();showToast('Backup restored!')}
+  close('settingsOverlay');
+ }catch(err){console.error(err);showToast('Could not restore backup. Check the file and connection.')}
+ finally{cloudBusy=false;e.target.value='';renderSync()}
+});
+$('resetBtn').addEventListener('click',async()=>{
+ if(!syncIsReady())return;
+ const msg=cloudPair?'Clear ALL shared records and rewards on BOTH phones? This cannot be undone unless you have a backup.':'Clear all recorded mornings and rewards? This cannot be undone unless you exported a backup.';
+ if(!confirm(msg))return;
+ if(cloudPair){cloudBusy=true;try{await cloudApi.replaceAll(currentFamily,defaultState());showToast('Shared tracker reset on both phones.')}
+  catch(err){console.error(err);showToast('Could not reset shared tracker.')}
+  finally{cloudBusy=false;renderSync()}}
+ else{state=defaultState();persist();renderDashboard();showToast('Tracker reset.')}
+ close('settingsOverlay');
+});
+document.querySelectorAll('[data-close]').forEach(x=>x.addEventListener('click',()=>close(x.dataset.close)));
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)close(o.id)}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){close('dateOverlay');close('settingsOverlay')}});
+$('syncBanner').addEventListener('click',()=>{$('settingsBtn').click()});
+$('createSharedBtn').addEventListener('click',createFamily);
+$('joinSharedBtn').addEventListener('click',()=>{
+ const raw=$('joinCode').value.trim();
+ const code=/^[a-f0-9]{32}$/i.test(raw)?raw:(()=>{try{const url=new URL(raw);return new URLSearchParams(url.hash.slice(1)).get('box')||url.searchParams.get('box')}catch(_){return null}})();
+ connectFamily(code);
+});
+$('copyLinkBtn').addEventListener('click',async()=>{
+ if(!cloudPair)return;
+ try{await navigator.clipboard.writeText(shareURL());showToast('Invite link copied! Send it privately to the other parent.')}
+ catch(_){prompt('Copy this private invite link:',shareURL())}
+});
+$('leaveSharedBtn').addEventListener('click',()=>{
+ if(!confirm('Stop syncing on this phone? It will keep a local copy of the records, but future updates will not be shared.'))return;
+ if(cloudPair)cloudPair.stop();cloudPair=null;currentFamily='';cloudOnline=false;try{localStorage.removeItem(FAMILY_KEY)}catch(_){}renderSync();showToast('This phone is now using local records only.');
+});
+window.addEventListener('online',()=>{if(cloudPair){cloudOnline=false;renderSync()}});
+window.addEventListener('offline',()=>{cloudOnline=false;renderSync()});
+renderDashboard();
+if(firebaseConfigured){
+ const linked=new URLSearchParams(location.hash.slice(1)).get('box');
+ let saved=null;try{saved=localStorage.getItem(FAMILY_KEY)}catch(_){}
+ if(linked && /^[a-f0-9]{32}$/i.test(linked)){
+   const needConfirm=Object.keys(state.days).length>0&&saved!==linked;
+   if(!needConfirm||confirm('A sharing link was opened. Join this shared box? Your local records will be replaced. Back up first if needed.'))connectFamily(linked,true);
+ }else if(saved&&/^[a-f0-9]{32}$/i.test(saved))connectFamily(saved,true);
+}
+if(location.protocol==='https:'&&'serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>

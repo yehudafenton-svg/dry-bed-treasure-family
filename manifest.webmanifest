@@ -1,0 +1,14 @@
+{
+  "name": "Dry Bed Treasure",
+  "short_name": "Dry Bed",
+  "description": "A cheerful, optionally shared dry-bed reward tracker with a money box",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff9ee",
+  "theme_color": "#fff9ee",
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
